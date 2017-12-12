@@ -1,30 +1,62 @@
 var gulp = require('gulp'),
-    sass = require('gulp-sass');
+    sass = require('gulp-sass'),
+    browserSync = require('browser-sync'),
+    concat = require('gulp-concat'),
+    uglify = require('gulp-uglifyjs')
+    concat = require('gulp-concat'),
+    cssnano = require('gulp-cssnano'),
+    rename = require('gulp-rename'),
+    del = require('del');
 
-//To run use gulp mytask
 gulp.task('mytask', function () {
     console.log("Hello new task");
 });
 
-/*
-* gulp.task('mytask', function(){
-*   return gulp.src('src-files') //select files for work with plugins
-*   .pipe(plugin()) //call gulp plugin for work with files
-*   .pipe(gulp.dest('folder')) //put result to folder
-* });
-*/
-
 gulp.task('sass', function () {
     return gulp.src('../sass/**/*.scss')
         .pipe(sass())
-        .pipe(gulp.dest('../css'));
+        .pipe(gulp.dest('../css'))
+        .pipe(browserSync.reload({
+            stream: true
+        }));
 });
 
-/*
-* *.sass - all files in current dir
-* **/
-/**.js - (without one /) selects all js files in whole project
- * !header.sass - except file from whole selection
- * *.+(sass|scss) - all scss and sass files from current dir
- * */
+gulp.task('browser-sync', function () {
+    browserSync({
+        server: {
+            baseDir: '../../'
+        },
+        notify: false
+    });
+});
 
+gulp.task('scripts', function () {
+    return gulp.src([
+            '../../node_modules/jquery/dist/jquery.min.js',
+            '../../node_modules/magnific-popup/dist/jquery.magnific-popup.min.js',
+            './main.js'
+        ]).pipe(concat('libs.min.js'))
+        .pipe(uglify({
+            inSourceMap: true
+        }))
+        .pipe(gulp.dest('../../dist/js'));
+});
+
+gulp.task('styles', function () {
+    return gulp.src('../css/*.css')
+        .pipe(cssnano())
+        .pipe(rename({
+            suffix: '.min'
+        }))
+        .pipe(gulp.dest('../../dist/css'));
+});
+
+gulp.task('clean', function() {
+    return del.sync('../../dist',{force: true}); // Удаляем папку dist перед сборкой
+});
+
+gulp.task('watch', ['browser-sync', 'sass', 'scripts', 'styles','clean'], function () {
+    gulp.watch('../sass/**/*.+(sass|scss)', ['sass', 'styles']);
+    gulp.watch('../../*.html', browserSync.reload);
+    gulp.watch('./*.js', ['scripts']);
+});

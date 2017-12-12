@@ -1,5 +1,12 @@
+@import "../../node_modules/magnific-popup/dist/magnific-popup";
+
 $c: #c5c5c5;
+$f: rgb(48, 44, 44);
 
 body {
   background-color: $c;
+  color: $f;
+  font-size:  1rem;
+  text-align: center;
+  text-transform: uppercase;
 }

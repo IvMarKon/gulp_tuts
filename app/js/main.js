@@ -1,0 +1,3 @@
+$('body').css({
+    color: "green"
+});
